@@ -1,71 +1,104 @@
-// TODO: Import required modules
-// Hint: You will need the 'fs' module for reading the file and the 'chalk' library for coloring the words.
+// app.js
+const fs = require('fs');
+const chalk = require('chalk');
 
 /**
- * Synchronously reads the content of 'declaration.txt'.
- * @returns {string} The content of the file.
+ * Reads and returns the content of 'declaration.txt'.
+ * Make sure 'declaration.txt' is in the same directory as this file.
  */
 function readFileContent() {
-    // TODO: Use the 'fs' module to synchronously read the content of 'declaration.txt' and return it.
+  return fs.readFileSync('declaration.txt', 'utf8');
 }
 
 /**
- * Gets the word count from the content.
- * @param {string} content The file content.
- * @returns {Object} An object with words as keys and their occurrences as values.
+ * Returns an object mapping words (lowercased) to their frequency.
+ * @param {string} content - The text content to analyze.
+ * @returns {{ [word: string]: number }}
  */
 function getWordCounts(content) {
-    // TODO: Implement a function to count occurrences of each word in the content.
-    // Hint: Consider splitting the content into words and then tallying the counts.
-    const wordCount = {};
-    const words = content.split(/\W+/).filter(Boolean); // Splitting by non-word characters.
+  const wordCount = {};
+  // Split on non-word characters, ignoring empty strings
+  const words = content.split(/\W+/).filter(Boolean);
 
+  for (let word of words) {
+    word = word.toLowerCase();
+    wordCount[word] = (wordCount[word] || 0) + 1;
+  }
+  return wordCount;
 }
 
 /**
- * Colors a word based on its frequency.
- * @param {string} word The word to be colored.
- * @param {number} count The frequency of the word.
- * @returns {string} The colored word.
+ * Colors a word based on how frequently it appears.
+ *  - freq = 1  => blue
+ *  - freq = 2-5 => green
+ *  - freq > 5  => red
+ * @param {string} word - The original (case-sensitive) word to color.
+ * @param {number} count - The word's frequency.
+ * @returns {string} - The chalk-colored word.
  */
 function colorWord(word, count) {
-    // TODO: Return the word colored based on its frequency using the 'chalk' library.
-    // For example: 
-    // - Words that occur once can be blue
-    // - Words that occur between 2 and 5 times can be green
-    // - Words that occur more than 5 times can be red
+  if (count === 1) {
+    return chalk.blue(word);
+  } else if (count >= 2 && count <= 5) {
+    return chalk.green(word);
+  } else if (count > 5) {
+    return chalk.red(word);
+  }
+  // If somehow count is 0 or not found, return as-is (unlikely if everything is in sync).
+  return word;
 }
 
 /**
- * Prints the first 15 lines of the content with colored words.
- * @param {string} content The file content.
- * @param {Object} wordCount The word occurrences.
+ * Prints the first 15 lines of the content with each word colored.
+ * Adds a trailing space at the end of each line to match the test expectations.
+ * @param {string} content - The text content to print.
+ * @param {{ [word: string]: number }} wordCounts - The frequency map.
  */
-function printColoredLines(content, wordCount) {
-    const lines = content.split('\n').slice(0, 15);
+function printColoredLines(content, wordCounts) {
+  // Only print the first 15 lines (as an example)
+  const lines = content.split('\n').slice(0, 15);
 
-    for (const line of lines) {
-        const coloredLine = line.split(/\W+/).map(word => {
-            // TODO: Color the word based on its frequency using the 'colorWord' function.
-        }).join(' ');
+  for (const line of lines) {
+    // Split line by non-word characters, ignoring empty entries.
+    const wordsInLine = line.split(/\W+/).filter(Boolean);
 
-        console.log(coloredLine);
-    }
+    // Color each word based on frequency
+    const colored = wordsInLine.map((originalWord) => {
+      const lowerWord = originalWord.toLowerCase();
+      const frequency = wordCounts[lowerWord] || 0;
+      return colorWord(originalWord, frequency);
+    });
+
+    // Join with a space, then add a trailing space to match your test's exact output
+    const outputLine = colored.join(' ') + ' ';
+    console.log(outputLine);
+  }
 }
 
 /**
- * Main function to read the file, count the word occurrences and print the colored lines.
+ * Optionally, a "main" function if you run app.js directly:
+ *  - Reads 'declaration.txt'
+ *  - Gets word counts
+ *  - Prints colored lines
  */
 function processFile() {
-    const content = readFileContent();
-    const wordCount = getWordCounts(content);
-    printColoredLines(content, wordCount);
+  const content = readFileContent();
+  const wordCounts = getWordCounts(content);
+  printColoredLines(content, wordCounts);
 }
 
+/**
+ * If this file is run directly (`node app.js`), execute processFile.
+ */
 if (require.main === module) {
-    // This will execute only if the file is run directly.
-    processFile();
+  processFile();
 }
 
-// TODO: Export the functions for testing
-// Hint: You can use the 'module.exports' syntax.
+// Export all the functions for testing
+module.exports = {
+  readFileContent,
+  getWordCounts,
+  colorWord,
+  printColoredLines,
+  processFile
+};
