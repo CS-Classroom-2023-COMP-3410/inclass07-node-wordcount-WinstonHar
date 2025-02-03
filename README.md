@@ -23,7 +23,7 @@ In this exercise, you'll be constructing a Node.js application that reads in a p
 
 6. You're also provided with a test suite inside the `__tests__` directory in a file named `test-app.js`. These tests are designed to check the correctness of your implementation.
 
----
+--- install jest
 
 **Requirements**:
 
